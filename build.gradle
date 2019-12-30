@@ -1,0 +1,53 @@
+buildscript {
+    dependencies {
+        classpath('se.transmode.gradle:gradle-docker:1.2')
+    }
+}
+plugins {
+    id 'org.springframework.boot' version '2.2.2.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.8.RELEASE'
+    id 'java'
+}
+
+group = 'com.homework.micserv'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+apply plugin: 'java'
+apply plugin: 'docker'
+
+configurations {
+    developmentOnly
+    runtimeClasspath {
+        extendsFrom developmentOnly
+    }
+}
+
+
+
+test {
+    useJUnitPlatform()
+}
+
+
+task buildDocker(type: Docker, dependsOn: build) {
+    applicationName = jar.baseName
+    dockerfile = file('Dockerfile')
+    doFirst {
+        copy {
+            from jar
+            into stageDir
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-data-rest'
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+}
